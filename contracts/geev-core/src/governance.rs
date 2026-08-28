@@ -1,3 +1,4 @@
+use crate::profile::{ProfileContract, SLASH_AMOUNT};
 use crate::types::{ContentType, DataKey, Error, GiveawayStatus, HelpRequestStatus};
 use soroban_sdk::{contract, contractevent, contractimpl, Address, Env};
 
@@ -148,8 +149,9 @@ impl GovernanceContract {
 
     /// Try to suspend the content item identified by both type and ID.
     /// Silently skips if the intended item does not exist or is not active.
+    /// On successful suspension, slashes the author's reputation by [`SLASH_AMOUNT`].
     fn auto_suspend(env: &Env, content_type: ContentType, target_id: u64, count: u32) {
-        let suspended = match content_type {
+        let author = match content_type {
             ContentType::Giveaway => {
                 let key = DataKey::Giveaway(target_id);
                 if let Some(mut giveaway) = env
@@ -158,14 +160,15 @@ impl GovernanceContract {
                     .get::<DataKey, crate::types::Giveaway>(&key)
                 {
                     if giveaway.status == GiveawayStatus::Active {
+                        let creator = giveaway.creator.clone();
                         giveaway.status = GiveawayStatus::Suspended;
                         env.storage().persistent().set(&key, &giveaway);
-                        true
+                        Some(creator)
                     } else {
-                        false
+                        None
                     }
                 } else {
-                    false
+                    None
                 }
             }
             ContentType::HelpRequest => {
@@ -176,19 +179,21 @@ impl GovernanceContract {
                     .get::<DataKey, crate::types::HelpRequest>(&key)
                 {
                     if request.status == HelpRequestStatus::Open {
+                        let creator = request.creator.clone();
                         request.status = HelpRequestStatus::Suspended;
                         env.storage().persistent().set(&key, &request);
-                        true
+                        Some(creator)
                     } else {
-                        false
+                        None
                     }
                 } else {
-                    false
+                    None
                 }
             }
         };
 
-        if suspended {
+        if let Some(creator) = author {
+            ProfileContract::slash_reputation(env, creator, SLASH_AMOUNT);
             ContentAutoSuspended {
                 content_type,
                 target_id,

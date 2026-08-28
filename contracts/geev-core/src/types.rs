@@ -150,6 +150,8 @@ pub enum DataKey {
     FlagRecord(ContentType, u64, Address),
     FlagCount(ContentType, u64),
     Reputation(Address),
+    /// Ledger timestamp when reputation was last written (after increment, slash, or decay).
+    ReputationUpdatedAt(Address),
     // ─── Dispute Tracking ──────────────────────────────────────────────────
     DisputeRaisedAt(u64),          // timestamp when dispute was raised
     DisputeRaisedBy(u64, Address), // who raised the dispute

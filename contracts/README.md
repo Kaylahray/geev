@@ -26,6 +26,20 @@ to `Random`; use `create_giveaway_with_selection` to choose explicitly):
 All methods share the same claim lifecycle (`claim_prize` / `recover_unclaimed_prize`)
 once status becomes `Claimable`.
 
+### Reputation
+
+Reputation is a `u64` score stored under `DataKey::Reputation(Address)`.
+
+- **Earn:** creators gain +1 on successful prize claim (`increment_reputation`).
+- **Slash:** auto-suspension (flag count ≥ `FLAG_THRESHOLD`) deducts `SLASH_AMOUNT` (5)
+  from the content author via `slash_reputation` (saturates at 0).
+- **Restore:** `AdminContract::resolve_appeal(..., restore: true)` credits `SLASH_AMOUNT`
+  back to the author.
+- **Decay (on read):** `get_reputation` applies decay before returning. For each full
+  `DECAY_PERIOD_SECONDS` (30 days) since `DataKey::ReputationUpdatedAt`, subtract
+  `DECAY_PER_PERIOD` (1). The decayed value is persisted. Scores never go below zero.
+  `min_reputation` gating uses this adjusted score.
+
 ## Contract Structure
 
 ### Core Types
