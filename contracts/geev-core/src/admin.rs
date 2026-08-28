@@ -1,4 +1,5 @@
 use crate::types::{DataKey, Error, GiveawayStatus, HelpRequestStatus};
+use crate::utils::validate_fee;
 use crate::{access::check_admin, types::HelpRequest};
 use soroban_sdk::{contract, contractevent, contractimpl, panic_with_error, token, Address, Env};
 
@@ -220,5 +221,30 @@ impl AdminContract {
             new_admin,
         }
         .publish(&env);
+    }
+
+    /// Update the global protocol fee (basis points) after init.
+    ///
+    /// Does not rewrite already-accrued `CollectedFees`. Effective fee at claim
+    /// time still follows: giveaway override → token fee → global fee → default.
+    ///
+    /// # Panics
+    /// Panics if caller is not admin or `fee_bps` exceeds `MAX_FEE_BPS`.
+    pub fn set_fee(env: Env, fee_bps: u32) {
+        check_admin(&env);
+        validate_fee(&env, fee_bps);
+        env.storage().instance().set(&DataKey::Fee, &fee_bps);
+    }
+
+    /// Set a per-token fee that takes precedence over the global fee.
+    ///
+    /// # Panics
+    /// Panics if caller is not admin or `fee_bps` exceeds `MAX_FEE_BPS`.
+    pub fn set_token_fee(env: Env, token: Address, fee_bps: u32) {
+        check_admin(&env);
+        validate_fee(&env, fee_bps);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenFee(token), &fee_bps);
     }
 }

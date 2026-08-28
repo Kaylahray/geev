@@ -19,6 +19,19 @@ The Geev Core contract enables decentralized giveaway creation and management wi
 - **Status Validation**: Only works on `Active` giveaways
 - **Participant Indexing**: Maintains `ParticipantIndex` mapping for efficient lookup
 
+### Protocol Fees
+
+Fees are expressed in basis points (bps). `MAX_FEE_BPS` is `10_000` (100%).
+
+**Resolution order at claim time** (highest precedence first):
+
+1. **Giveaway override** — optional `fee_bps` passed at `create_giveaway` / `create_giveaway_with_selection` and stored on the `Giveaway`
+2. **Per-token fee** — `DataKey::TokenFee(Address)` set via `AdminContract::set_token_fee`
+3. **Global fee** — `DataKey::Fee` set at `init` or updated via `AdminContract::set_fee`
+4. **Default** — `100` bps (1%) if nothing else is set
+
+Changing global or token fees after init does **not** rewrite amounts already accrued in `DataKey::CollectedFees`. Giveaways without an override pick up the new rate on subsequent claims; giveaways with an explicit override keep that rate.
+
 ## Contract Structure
 
 ### Core Types

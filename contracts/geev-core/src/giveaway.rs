@@ -3,7 +3,7 @@ use crate::profile::ProfileContract;
 use crate::types::{
     DataKey, Error, Giveaway, GiveawayStatus, ParticipantVerification, SelectionMethod,
 };
-use crate::utils::with_reentrancy_guard;
+use crate::utils::{resolve_fee_bps, validate_fee, with_reentrancy_guard};
 use soroban_sdk::{
     contract, contractevent, contractimpl, panic_with_error, token, Address, Env, String, Vec,
 };
@@ -50,6 +50,7 @@ impl GiveawayContract {
         duration_seconds: u64,
         winner_count: u32,
         verification: Option<ParticipantVerification>,
+        fee_bps: Option<u32>,
     ) -> u64 {
         Self::create_giveaway_with_selection(
             env,
@@ -61,6 +62,7 @@ impl GiveawayContract {
             winner_count,
             verification,
             SelectionMethod::Random,
+            fee_bps,
         )
     }
 
@@ -75,11 +77,16 @@ impl GiveawayContract {
         winner_count: u32,
         verification: Option<ParticipantVerification>,
         selection_method: SelectionMethod,
+        fee_bps: Option<u32>,
     ) -> u64 {
         creator.require_auth();
 
         if winner_count == 0 {
             panic_with_error!(&env, Error::InvalidWinnerCount);
+        }
+
+        if let Some(fee) = fee_bps {
+            validate_fee(&env, fee);
         }
 
         // Check if token is whitelisted
@@ -119,6 +126,7 @@ impl GiveawayContract {
             selection_method,
             claim_deadline: 0,
             claimed_count: 0,
+            fee_bps,
         };
 
         if let Some(verification) = &verification {
@@ -371,8 +379,7 @@ impl GiveawayContract {
                 panic_with_error!(&env, Error::AlreadyClaimed);
             }
 
-            let fee_key = DataKey::Fee;
-            let fee_bps: u32 = env.storage().instance().get(&fee_key).unwrap_or(100); // Default to 100 bps (1%)
+            let fee_bps = resolve_fee_bps(&env, &giveaway);
 
             let gross_share =
                 Self::winner_gross_share(&env, giveaway.amount, giveaway.winner_count, index);
@@ -464,6 +471,8 @@ impl GiveawayContract {
         if env.storage().instance().has(&admin_key) {
             panic_with_error!(&env, Error::AlreadyInitialized);
         }
+
+        validate_fee(&env, fee_bps);
 
         // Store admin address
         env.storage().instance().set(&admin_key, &admin);
