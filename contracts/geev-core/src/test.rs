@@ -54,6 +54,7 @@ fn test_giveaway_flow() {
         &duration,
         &1,
         &None,
+        &None,
     );
 
     assert_eq!(token_client.balance(&creator), 500);
@@ -110,6 +111,7 @@ fn test_creator_cancels_empty_giveaway_and_recovers_escrow() {
         &String::from_str(&env, "Cancelled giveaway"),
         &60,
         &1,
+        &None,
         &None,
     );
     client.cancel_giveaway(&creator, &giveaway_id);
@@ -168,6 +170,7 @@ fn test_giveaway_cancellation_rejects_non_creator_and_existing_entries() {
         &String::from_str(&env, "Active giveaway"),
         &60,
         &1,
+        &None,
         &None,
     );
     assert_eq!(
@@ -230,6 +233,7 @@ fn test_allowlist_rejects_unverified_participant() {
             min_reputation: 0,
             uses_reputation: false,
         }),
+        &None,
     );
 
     contract_client.enter_giveaway(&allowed_user, &giveaway_id);
@@ -278,6 +282,7 @@ fn test_reputation_gated_giveaway_rejects_low_reputation() {
             min_reputation: 5,
             uses_reputation: true,
         }),
+        &None,
     );
 
     contract_client.enter_giveaway(&high_rep_user, &giveaway_id);
@@ -318,6 +323,7 @@ fn test_multi_winner_giveaway_selects_unique_winners() {
         &String::from_str(&env, "Multi Winner Giveaway"),
         &60,
         &2,
+        &None,
         &None,
     );
 
@@ -391,6 +397,7 @@ fn test_double_entry_fails() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&greedy_user, &id);
@@ -433,6 +440,7 @@ fn test_enter_late_fails() {
         &String::from_str(&env, "Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -478,6 +486,7 @@ fn test_pick_winner_early_fails() {
         &String::from_str(&env, "Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -865,6 +874,7 @@ fn test_claim_prize() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -941,6 +951,7 @@ fn test_claim_prize_wrong_status_fails() {
         &String::from_str(&env, "Prize Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -1166,6 +1177,7 @@ fn test_claim_prize_reentrancy_protection() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -1272,6 +1284,7 @@ fn test_create_giveaway_with_whitelisted_token() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     assert_eq!(giveaway_id, 1);
@@ -1305,6 +1318,7 @@ fn test_create_giveaway_with_non_whitelisted_token_fails() {
         &String::from_str(&env, "Non-Whitelisted Token Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 }
@@ -1468,6 +1482,7 @@ fn test_withdraw_fees() {
         &String::from_str(&env, "Fee Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -1818,6 +1833,7 @@ fn seed_active_giveaway(env: &Env, contract_id: &Address, giveaway_id: u64, toke
         selection_method: SelectionMethod::Random,
         claim_deadline: 0,
         claimed_count: 0,
+        fee_bps: None,
     };
     env.as_contract(contract_id, || {
         env.storage()
@@ -2039,6 +2055,7 @@ fn test_enter_suspended_giveaway_fails() {
                 selection_method: SelectionMethod::Random,
                 claim_deadline: 0,
                 claimed_count: 0,
+                fee_bps: None,
             },
         );
     });
@@ -2136,6 +2153,7 @@ fn test_reputation_increments_after_claim_prize() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2189,6 +2207,7 @@ fn test_reputation_accumulates_across_giveaways() {
             &60,
             &1,
             &None,
+            &None,
         );
         client.enter_giveaway(&participant, &giveaway_id);
         env.ledger().with_mut(|li| li.timestamp += 100);
@@ -2241,6 +2260,7 @@ fn test_manual_winner_selection() {
         &2,
         &None,
         &SelectionMethod::Manual,
+        &None,
     );
 
     client.enter_giveaway(&participant1, &giveaway_id);
@@ -2306,6 +2326,7 @@ fn test_manual_winner_selection_fails_non_creator() {
         &1,
         &None,
         &SelectionMethod::Manual,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2360,6 +2381,7 @@ fn test_merit_winner_selection() {
         &2,
         &None,
         &SelectionMethod::Merit,
+        &None,
     );
 
     client.enter_giveaway(&participant1, &giveaway_id);
@@ -2419,6 +2441,7 @@ fn test_pick_winner_fails_on_manual_giveaway() {
         &1,
         &None,
         &SelectionMethod::Manual,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2462,6 +2485,7 @@ fn test_admin_can_finalize_manual_winners() {
         &1,
         &None,
         &SelectionMethod::Manual,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2503,6 +2527,7 @@ fn test_create_giveaway_defaults_to_random_selection() {
         &String::from_str(&env, "Default Random"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -2551,6 +2576,7 @@ fn test_first_come_marks_winners_on_entry() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2607,6 +2633,7 @@ fn test_first_come_winner_selection() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2666,6 +2693,7 @@ fn test_first_come_finalize_emits_winner_events() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2728,6 +2756,7 @@ fn test_pick_winner_fails_on_first_come_giveaway() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2767,6 +2796,7 @@ fn test_first_come_finalize_fails_on_random_giveaway() {
         &String::from_str(&env, "Random Not First Come"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -2809,6 +2839,7 @@ fn test_first_come_finalize_before_end_fails() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2853,6 +2884,7 @@ fn test_first_come_winners_can_claim_prize() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&winner, &giveaway_id);
@@ -3062,6 +3094,7 @@ fn test_create_giveaway_succeeds_before_and_fails_after_delist() {
         &60,
         &1,
         &None,
+        &None,
     );
     assert_eq!(giveaway_id, 1);
 
@@ -3080,6 +3113,7 @@ fn test_create_giveaway_succeeds_before_and_fails_after_delist() {
         &String::from_str(&env, "After Delist"),
         &60,
         &1,
+        &None,
         &None,
     );
     assert!(result.is_err());
@@ -3116,6 +3150,7 @@ fn test_existing_giveaway_continues_after_token_delist() {
         &String::from_str(&env, "Funded Before Delist"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -3171,6 +3206,7 @@ fn test_claim_prize_after_expiry_fails() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -3217,6 +3253,7 @@ fn test_claim_prize_twice_fails() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -3260,6 +3297,7 @@ fn test_claim_prize_by_non_winner_fails() {
         &String::from_str(&env, "Non Winner Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -3309,6 +3347,7 @@ fn test_recover_before_expiry_fails() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -3350,6 +3389,7 @@ fn test_recover_after_expiry_succeeds() {
         &String::from_str(&env, "Recovery Test"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -3413,6 +3453,7 @@ fn test_recover_by_unauthorized_caller_fails() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     contract_client.enter_giveaway(&winner, &giveaway_id);
@@ -3458,6 +3499,7 @@ fn test_partial_claim_recovery() {
         &String::from_str(&env, "Partial Claim Recovery Test"),
         &60,
         &2,
+        &None,
         &None,
     );
 
@@ -3882,6 +3924,7 @@ fn seed_active_giveaway_with_creator(
         selection_method: SelectionMethod::Random,
         claim_deadline: 0,
         claimed_count: 0,
+        fee_bps: None,
     };
     env.as_contract(contract_id, || {
         env.storage()
@@ -4152,6 +4195,7 @@ fn test_resolve_appeal_restore_false_keeps_giveaway_suspended() {
                 selection_method: SelectionMethod::Random,
                 claim_deadline: 0,
                 claimed_count: 0,
+                fee_bps: None,
             },
         );
     });
@@ -4394,6 +4438,7 @@ fn test_resolve_appeal_emits_appeal_resolved_event() {
                 selection_method: SelectionMethod::Random,
                 claim_deadline: 0,
                 claimed_count: 0,
+                fee_bps: None,
             },
         );
     });
@@ -4452,7 +4497,7 @@ fn test_file_appeal_emits_content_appealed_event() {
 
 // ── Reputation slash & decay ──────────────────────────────────────────────────
 
-use crate::profile::{DECAY_PERIOD_SECONDS, DECAY_PER_PERIOD, SLASH_AMOUNT};
+use crate::profile::{DECAY_PER_PERIOD, DECAY_PERIOD_SECONDS, SLASH_AMOUNT};
 
 #[test]
 fn test_auto_suspend_slashes_author_reputation() {
@@ -4511,7 +4556,6 @@ fn test_slash_reputation_never_underflows() {
     let creator = Address::generate(&env);
     seed_active_giveaway_with_creator(&env, &contract_id, giveaway_id, &token, &creator);
 
-    // Reputation below SLASH_AMOUNT
     env.as_contract(&contract_id, || {
         env.storage()
             .persistent()
@@ -4555,7 +4599,6 @@ fn test_successful_appeal_restores_slashed_reputation() {
     let giveaway_id: u64 = 79;
     let creator = Address::generate(&env);
 
-    // Reputation after a prior slash
     let post_slash: u64 = 10;
     env.as_contract(&admin_contract_id, || {
         env.storage()
@@ -4582,6 +4625,7 @@ fn test_successful_appeal_restores_slashed_reputation() {
             selection_method: SelectionMethod::Random,
             claim_deadline: 0,
             claimed_count: 0,
+            fee_bps: None,
         };
         env.storage()
             .persistent()
@@ -4624,7 +4668,6 @@ fn test_reputation_decays_over_ledger_time() {
             .set(&DataKey::ReputationUpdatedAt(user.clone()), &start_ts);
     });
 
-    // Advance two full decay periods
     env.ledger().with_mut(|li| {
         li.timestamp = start_ts + DECAY_PERIOD_SECONDS * 2;
     });
@@ -4685,7 +4728,6 @@ fn test_min_reputation_gating_uses_slashed_score() {
         env.storage()
             .instance()
             .set(&DataKey::AllowedToken(mock_token.clone()), &true);
-        // Participant would pass before slash (rep 5 >= min 5), fail after slash of 5.
         env.storage()
             .persistent()
             .set(&DataKey::Reputation(participant.clone()), &5u64);
@@ -4695,9 +4737,12 @@ fn test_min_reputation_gating_uses_slashed_score() {
         );
     });
 
-    // Simulate governance slash on this contract's storage (same DataKey namespace)
     env.as_contract(&contract_id, || {
-        crate::profile::ProfileContract::slash_reputation(&env, participant.clone(), SLASH_AMOUNT);
+        crate::profile::ProfileContract::slash_reputation(
+            &env,
+            participant.clone(),
+            SLASH_AMOUNT,
+        );
     });
 
     let giveaway_id = client.create_giveaway(
@@ -4712,9 +4757,363 @@ fn test_min_reputation_gating_uses_slashed_score() {
             min_reputation: 5,
             uses_reputation: true,
         }),
+        &None,
     );
 
-    // Should panic: reputation is 0 after slash
     let result = client.try_enter_giveaway(&participant, &giveaway_id);
     assert!(result.is_err());
+}
+
+// ── Configurable fee tiers ────────────────────────────────────────────────────
+
+#[test]
+fn test_admin_can_set_global_fee_after_init() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(AdminContract, ());
+    let client = AdminContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Fee, &100u32);
+    });
+
+    client.set_fee(&250u32);
+
+    env.as_contract(&contract_id, || {
+        let fee: u32 = env.storage().instance().get(&DataKey::Fee).unwrap();
+        assert_eq!(fee, 250);
+    });
+}
+
+#[test]
+fn test_admin_can_set_token_fee() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(AdminContract, ());
+    let client = AdminContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let token = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    });
+
+    client.set_token_fee(&token, &50u32);
+
+    env.as_contract(&contract_id, || {
+        let fee: u32 = env
+            .storage()
+            .instance()
+            .get(&DataKey::TokenFee(token.clone()))
+            .unwrap();
+        assert_eq!(fee, 50);
+    });
+}
+
+#[test]
+#[should_panic]
+fn test_set_fee_rejects_above_max() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(AdminContract, ());
+    let client = AdminContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+
+    env.as_contract(&contract_id, || {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    });
+
+    client.set_fee(&(crate::utils::MAX_FEE_BPS + 1));
+}
+
+#[test]
+#[should_panic]
+fn test_create_giveaway_rejects_fee_above_max() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+    let creator = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+    });
+
+    client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Too High Fee"),
+        &60,
+        &1,
+        &None,
+        &Some(crate::utils::MAX_FEE_BPS + 1),
+    );
+}
+
+#[test]
+fn test_fee_precedence_giveaway_override_wins() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_client = token::Client::new(&env, &mock_token);
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+
+    let creator = Address::generate(&env);
+    let winner = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+        env.storage().instance().set(&DataKey::Fee, &500u32);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenFee(mock_token.clone()), &200u32);
+    });
+
+    let giveaway_id = client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Override Wins"),
+        &60,
+        &1,
+        &None,
+        &Some(0u32),
+    );
+
+    client.enter_giveaway(&winner, &giveaway_id);
+    env.ledger().with_mut(|li| li.timestamp += 100);
+    client.pick_winner(&giveaway_id);
+    client.claim_prize(&giveaway_id, &winner);
+
+    assert_eq!(token_client.balance(&winner), 500);
+    assert_eq!(token_client.balance(&contract_id), 0);
+}
+
+#[test]
+fn test_fee_precedence_token_over_global() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_client = token::Client::new(&env, &mock_token);
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+
+    let creator = Address::generate(&env);
+    let winner = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+        env.storage().instance().set(&DataKey::Fee, &500u32);
+        env.storage()
+            .instance()
+            .set(&DataKey::TokenFee(mock_token.clone()), &200u32);
+    });
+
+    let giveaway_id = client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Token Fee"),
+        &60,
+        &1,
+        &None,
+        &None,
+    );
+
+    client.enter_giveaway(&winner, &giveaway_id);
+    env.ledger().with_mut(|li| li.timestamp += 100);
+    client.pick_winner(&giveaway_id);
+    client.claim_prize(&giveaway_id, &winner);
+
+    assert_eq!(token_client.balance(&winner), 490);
+    assert_eq!(token_client.balance(&contract_id), 10);
+}
+
+#[test]
+fn test_fee_precedence_global_over_default() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_client = token::Client::new(&env, &mock_token);
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+
+    let creator = Address::generate(&env);
+    let winner = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+        env.storage().instance().set(&DataKey::Fee, &200u32);
+    });
+
+    let giveaway_id = client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Global Fee"),
+        &60,
+        &1,
+        &None,
+        &None,
+    );
+
+    client.enter_giveaway(&winner, &giveaway_id);
+    env.ledger().with_mut(|li| li.timestamp += 100);
+    client.pick_winner(&giveaway_id);
+    client.claim_prize(&giveaway_id, &winner);
+
+    assert_eq!(token_client.balance(&winner), 490);
+    assert_eq!(token_client.balance(&contract_id), 10);
+}
+
+#[test]
+fn test_zero_bps_giveaway_pays_full_prize() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_client = token::Client::new(&env, &mock_token);
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+
+    let creator = Address::generate(&env);
+    let winner = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+        env.storage().instance().set(&DataKey::Fee, &100u32);
+    });
+
+    let giveaway_id = client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Charity Zero Fee"),
+        &60,
+        &1,
+        &None,
+        &Some(0u32),
+    );
+
+    client.enter_giveaway(&winner, &giveaway_id);
+    env.ledger().with_mut(|li| li.timestamp += 100);
+    client.pick_winner(&giveaway_id);
+    client.claim_prize(&giveaway_id, &winner);
+
+    assert_eq!(token_client.balance(&winner), 500);
+    assert_eq!(token_client.balance(&contract_id), 0);
+}
+
+#[test]
+fn test_midflight_fee_change_does_not_alter_collected_fees() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(GiveawayContract, ());
+    let client = GiveawayContractClient::new(&env, &contract_id);
+
+    let token_admin = Address::generate(&env);
+    let mock_token = env
+        .register_stellar_asset_contract_v2(token_admin.clone())
+        .address();
+    let token_admin_client = token::StellarAssetClient::new(&env, &mock_token);
+
+    let creator = Address::generate(&env);
+    let winner = Address::generate(&env);
+    token_admin_client.mint(&creator, &1000);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .instance()
+            .set(&DataKey::AllowedToken(mock_token.clone()), &true);
+        env.storage().instance().set(&DataKey::Fee, &100u32);
+    });
+
+    let giveaway_id = client.create_giveaway(
+        &creator,
+        &mock_token,
+        &500,
+        &String::from_str(&env, "Collected Fees Stable"),
+        &60,
+        &1,
+        &None,
+        &None,
+    );
+
+    client.enter_giveaway(&winner, &giveaway_id);
+    env.ledger().with_mut(|li| li.timestamp += 100);
+    client.pick_winner(&giveaway_id);
+    client.claim_prize(&giveaway_id, &winner);
+
+    let collected_before: i128 = env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .get(&DataKey::CollectedFees(mock_token.clone()))
+            .unwrap_or(0)
+    });
+    assert_eq!(collected_before, 5);
+
+    env.as_contract(&contract_id, || {
+        env.storage().instance().set(&DataKey::Fee, &500u32);
+    });
+
+    let collected_after: i128 = env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .get(&DataKey::CollectedFees(mock_token.clone()))
+            .unwrap_or(0)
+    });
+    assert_eq!(collected_after, collected_before);
 }

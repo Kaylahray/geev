@@ -75,6 +75,7 @@
                 {
                   "u32": 1
                 },
+                "void",
                 "void"
               ]
             }
@@ -176,6 +177,7 @@
                 {
                   "u32": 1
                 },
+                "void",
                 "void"
               ]
             }
@@ -549,6 +551,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "fee_bps"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "id"
                       },
                       "val": {
@@ -716,6 +724,12 @@
                       "val": {
                         "u64": "160"
                       }
+                    },
+                    {
+                      "key": {
+                        "symbol": "fee_bps"
+                      },
+                      "val": "void"
                     },
                     {
                       "key": {

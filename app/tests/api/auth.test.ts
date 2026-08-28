@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { parseResponse } from '../helpers/api';
+import { authConfig } from '@/lib/auth-config';
 
 // Must be hoisted so they are available before module imports are resolved
 const mockAuth = vi.hoisted(() => vi.fn());
@@ -173,5 +174,51 @@ describe('GET /api/auth/me', () => {
     expect(data.data.badges[0].id).toBe('badge_1');
     expect(data.data.badges[0].name).toBe('Early Adopter');
     expect(data.data.badges[0].awardedAt).toBeDefined();
+  });
+});
+
+describe('Auth.js Callbacks - Session Updates', () => {
+  it('jwt callback updates token.picture on trigger === "update"', async () => {
+    const initialToken = { picture: 'old-avatar.png', sub: '123' };
+    const updatePayload = { user: { image: 'new-avatar.png' } };
+
+    const updatedToken = await authConfig.callbacks!.jwt!({
+      token: initialToken,
+      trigger: 'update',
+      session: updatePayload,
+      user: undefined as any,
+      account: undefined as any,
+      profile: undefined as any,
+    });
+
+    expect(updatedToken.picture).toBe('new-avatar.png');
+  });
+
+  it('session callback preserves default fields and applies token data', async () => {
+    const mockSession = {
+      user: { name: 'Alice', email: 'alice@example.com' },
+      expires: '9999-12-31T00:00:00.000Z'
+    };
+    
+    const mockToken = {
+      id: 'user-123',
+      walletAddress: '0xabc123',
+      username: 'alice_crypto',
+      picture: 'new-avatar.png'
+    };
+
+    const resolvedSession = await authConfig.callbacks!.session!({
+      session: mockSession as any,
+      token: mockToken,
+      user: undefined as any,
+      newSession: undefined as any,
+      trigger: 'update'
+    });
+
+    expect(resolvedSession.user.name).toBe('Alice');
+    expect(resolvedSession.user.email).toBe('alice@example.com');
+    expect(resolvedSession.user.id).toBe('user-123');
+    expect(resolvedSession.user.walletAddress).toBe('0xabc123');
+    expect(resolvedSession.user.image).toBe('new-avatar.png');
   });
 });

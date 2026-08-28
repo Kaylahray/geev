@@ -13,7 +13,7 @@ export const authConfig = {
         username: { label: "Username", type: "text", optional: true },
         email: { label: "Email", type: "email", optional: true },
       },
-      async authorize (credentials: any) {
+      async authorize(credentials: any) {
         const parsedCredentials = z
           .object({
             walletAddress: z.string().regex(/^G[A-Z2-7]{55}$/, "Invalid Stellar address (must start with G and be 56 characters long)"),
@@ -63,22 +63,33 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt ({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // 1. Initial sign-in: Attach custom user fields to the token
       if (user) {
         token.id = user.id;
-        // Store walletAddress and username in token
         (token as any).walletAddress = (user as any).walletAddress || '';
         (token as any).username = (user as any).username || user.name || '';
       }
+
+      // 2. Session update: Merge the incoming session payload into the token
+      if (trigger === "update" && session?.user) {
+        if (session.user.image) {
+          token.picture = session.user.image;
+        }
+      }
+
       return token;
     },
-    async session ({ session, token }): Promise<any> {
+    async session({ session, token }): Promise<any> {
       if (token) {
-        (session.user as any) = {
+        // Spread the existing session.user to retain standard fields (name, email)
+        session.user = {
+          ...session.user,
           id: token.id as string,
           walletAddress: (token as any).walletAddress as string,
           username: (token as any).username as string,
-        };
+          image: token.picture as string | null | undefined, // Map token picture back to session image
+        } as any;
       }
       return session;
     },

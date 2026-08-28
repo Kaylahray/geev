@@ -1097,6 +1097,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "fee_bps"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "id"
                       },
                       "val": {
@@ -1382,6 +1388,12 @@
                       "val": {
                         "u64": "3600"
                       }
+                    },
+                    {
+                      "key": {
+                        "symbol": "fee_bps"
+                      },
+                      "val": "void"
                     },
                     {
                       "key": {
