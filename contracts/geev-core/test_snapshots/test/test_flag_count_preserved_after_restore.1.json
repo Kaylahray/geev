@@ -1073,6 +1073,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "fee_bps"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "id"
                       },
                       "val": {

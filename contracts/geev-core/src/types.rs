@@ -36,6 +36,7 @@ pub enum Error {
     ClaimWindowNotExpired = 27,
     AlreadyClaimed = 28,
     NotWinner = 29,
+    InvalidFee = 31,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -92,6 +93,9 @@ pub struct Giveaway {
     pub claim_deadline: u64,
     /// Number of winners who have successfully called `claim_prize`.
     pub claimed_count: u32,
+    /// Optional per-giveaway fee override in basis points.
+    /// When `Some`, takes precedence over token and global fees at claim time.
+    pub fee_bps: Option<u32>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -143,6 +147,8 @@ pub enum DataKey {
     Donation(u64, Address),
     Admin,
     Fee,
+    /// Optional per-token fee in basis points; takes precedence over global `Fee`.
+    TokenFee(Address),
     CollectedFees(Address),
     AllowedToken(Address),
     Profile(Address),
