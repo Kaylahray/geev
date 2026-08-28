@@ -4497,7 +4497,7 @@ fn test_file_appeal_emits_content_appealed_event() {
 
 // ── Reputation slash & decay ──────────────────────────────────────────────────
 
-use crate::profile::{DECAY_PER_PERIOD, DECAY_PERIOD_SECONDS, SLASH_AMOUNT};
+use crate::profile::{DECAY_PERIOD_SECONDS, DECAY_PER_PERIOD, SLASH_AMOUNT};
 
 #[test]
 fn test_auto_suspend_slashes_author_reputation() {
@@ -4738,11 +4738,7 @@ fn test_min_reputation_gating_uses_slashed_score() {
     });
 
     env.as_contract(&contract_id, || {
-        crate::profile::ProfileContract::slash_reputation(
-            &env,
-            participant.clone(),
-            SLASH_AMOUNT,
-        );
+        crate::profile::ProfileContract::slash_reputation(&env, participant.clone(), SLASH_AMOUNT);
     });
 
     let giveaway_id = client.create_giveaway(
