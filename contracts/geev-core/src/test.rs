@@ -2528,6 +2528,7 @@ fn test_create_giveaway_defaults_to_random_selection() {
         &60,
         &1,
         &None,
+        &None,
     );
 
     env.as_contract(&contract_id, || {
@@ -2575,6 +2576,7 @@ fn test_first_come_marks_winners_on_entry() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2631,6 +2633,7 @@ fn test_first_come_winner_selection() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2690,6 +2693,7 @@ fn test_first_come_finalize_emits_winner_events() {
         &2,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&first, &giveaway_id);
@@ -2752,6 +2756,7 @@ fn test_pick_winner_fails_on_first_come_giveaway() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2791,6 +2796,7 @@ fn test_first_come_finalize_fails_on_random_giveaway() {
         &String::from_str(&env, "Random Not First Come"),
         &60,
         &1,
+        &None,
         &None,
     );
 
@@ -2833,6 +2839,7 @@ fn test_first_come_finalize_before_end_fails() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&participant, &giveaway_id);
@@ -2877,6 +2884,7 @@ fn test_first_come_winners_can_claim_prize() {
         &1,
         &None,
         &SelectionMethod::FirstCome,
+        &None,
     );
 
     client.enter_giveaway(&winner, &giveaway_id);
