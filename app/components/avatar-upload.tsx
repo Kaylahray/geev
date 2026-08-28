@@ -23,8 +23,6 @@ export function AvatarUpload({ currentAvatarUrl, userId, onSuccess }: AvatarUplo
     setAvatarUrl(currentAvatarUrl ?? null)
   }, [currentAvatarUrl])
 
-  // MediaUpload also emits local preview URLs while uploading; only persist the
-  // permanent URL returned by the upload endpoint.
   const handleMediaChange = async (media: PostMedia[]) => {
     const item = media[0]
     const targetUserId = userId ?? session?.user?.id
@@ -49,7 +47,7 @@ export function AvatarUpload({ currentAvatarUrl, userId, onSuccess }: AvatarUplo
       setAvatarUrl(item.url)
       setSuccess(true)
 
-      // Refresh the NextAuth session so the avatar updates in the nav immediately
+      // The new jwt and session callbacks will successfully process this trigger
       if (session?.user) {
         await updateSession({ user: { ...session.user, image: item.url } })
       }
@@ -65,7 +63,6 @@ export function AvatarUpload({ currentAvatarUrl, userId, onSuccess }: AvatarUplo
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Current avatar preview */}
       <div className="relative h-24 w-24 overflow-hidden rounded-full bg-gray-100">
         {avatarUrl ? (
           <Image
